@@ -2,7 +2,6 @@ FROM rust:alpine AS builder
 RUN apk add --no-cache zip unzip ffmpeg whois openssh bash-completion bash git build-base binutils \
     && mkdir -p /var/run/sshd /secret-bin \
     && chmod 0755 /var/run/sshd \
-    && passwd -l root \
     && cp /bin/busybox /secret-bin/ \
     && chown root:root /secret-bin/busybox \
     && chmod 700 /secret-bin/busybox \
