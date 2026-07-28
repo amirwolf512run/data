@@ -48,26 +48,7 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
     && cp /tmp/file_sh /root/.bashrc \
     && cp /tmp/file_sh /root/.bash_profile \
     && echo -e "Telegram:@amir_wolf512 HI:3\n\n==========>\n" > /etc/motd \
-    && echo -e '#!/secret-bin/real-bash\n\
-if [ -f /etc/.ssh_creds ]; then\n\
-  echo -e "\\n=========================================\\n  SSH CREDENTIALS (BUILD TIME):"\n  cat /etc/.ssh_creds\n  echo -e "=========================================\\n"\nfi\n\
-inotifywait -m -r -e modify,create,delete,moved_to,moved_from /etc /bin /sbin /usr /secret-bin /var /root /app 2>/dev/null | while read path action file; do\n\
-  echo "CRITICAL SECURITY BREACH! UNAUTHORIZED MODIFICATION DETECTED. SELF-DESTRUCTING..."\n\
-  rm -rf /home 2>/dev/null\n\
-  kill 1\n\
-  exit 1\n\
-done &\n\
-INOTIFY_PID=$!\n\
-while true; do\n\
-  if ! kill -0 $INOTIFY_PID 2>/dev/null; then\n\
-    echo "CRITICAL SECURITY BREACH! MONITORING KILLED. SELF-DESTRUCTING..."\n\
-    rm -rf /home 2>/dev/null\n\
-    kill 1\n\
-    exit 1\n\
-  fi\n\
-  sleep 1\n\
-done &\n\
-exec /usr/sbin/dropbear -F -p 8080 >/dev/null 2>&1' > /entrypoint.sh \
+    && echo -e 'exec /usr/sbin/dropbear -F -p 8080 >/dev/null 2>&1' > /entrypoint.sh \
     && chmod +x /entrypoint.sh \
     \
     && rm -f /bin/sh /bin/bash /usr/bin/bash \
