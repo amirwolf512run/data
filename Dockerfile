@@ -1,37 +1,32 @@
-FROM rust:alpine
-#FROM python:3.13-alpine
-RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
-    && mkdir -p /secret-bin /etc/dropbear \
+RUN apk add --no-cache zip unzip ffmpeg whois openssh bash-completion bash git build-base binutils \
+    && mkdir -p /var/run/sshd /secret-bin \
+    && chmod 0755 /var/run/sshd \
+    && passwd -l root \
     && cp /bin/busybox /secret-bin/ \
     && chown root:root /secret-bin/busybox \
     && chmod 700 /secret-bin/busybox \
     && mv /bin/bash /secret-bin/real-bash \
     && ln -s /secret-bin/real-bash /secret-bin/sh \
     && ln -s /secret-bin/real-bash /secret-bin/ash \
-    && for cmd in ls cat mkdir rm cp mv echo chmod grep sed awk find touch clear dirnames base64 unzip; do \
+    && for cmd in ls cat mkdir rm cp mv echo chmod grep sed awk find touch clear dirnames base64; do \
          ln -s /secret-bin/busybox /secret-bin/$cmd 2>/dev/null || true; \
-        done \
-    \
-    && echo "/secret-bin/real-bash" >> /etc/shells \
-    \
+       done \
     && usernamezz="a$(cat /dev/urandom | tr -dc '0-9' | head -c 7)" \
     && passwordzz="A$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 10)" \
     && adduser -D -u 1000 -s /secret-bin/real-bash "$usernamezz" \
     && echo "$usernamezz:$passwordzz" | chpasswd \
+    && sed -i 's/#PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && echo "AllowUsers $usernamezz" >> /etc/ssh/sshd_config \
     && echo "export PATH=/secret-bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" >> /home/"$usernamezz"/.bashrc \
     && echo "export PS1='[amirwolf512]:\w\$ '" >> /home/"$usernamezz"/.bashrc \
     && echo -e "USERNAME: $usernamezz\nPASSWORD: $passwordzz" > /etc/.ssh_creds \
     && rm -rf /app && touch /app \
-    \
-    && dropbearkey -t ed25519 -f /etc/dropbear/dropbear_ed25519_host_key \
-    && dropbearkey -t rsa -f /etc/dropbear/dropbear_rsa_host_key \
-    && dropbearkey -t ecdsa -f /etc/dropbear/dropbear_ecdsa_host_key \
-    \
-    && echo -e '#!/secret-bin/sh\necho "CRITICAL SECURITY BREACH! SELF-DESTRUCTING..."\nrm -rf /home 2>/dev/null\nkill 1\nexit 1\n' > /tmp/file_sh \
+    && ssh-keygen -A \
+    && echo -e '#!/secret-bin/sh\necho "CRITICAL SECURITY BREACH! SELF-DESTRUCTING..."\nrm -rf /etc /bin /sbin /usr /var /home /app 2>/dev/null\nkill 1\nexit 1\n' > /tmp/file_sh \
     && chmod +x /tmp/file_sh \
-    && echo -e '#!/secret-bin/sh\nif [ "$(id -u)" = "0" ] && [ -t 0 ]; then\n  echo "CRITICAL SECURITY BREACH! SELF-DESTRUCTING..."\n  rm -rf /home 2>/dev/null\n  kill 1\n  exit 1\nfi\nexec /secret-bin/real-bash "$@"' > /tmp/bomb_bash \
+    && echo -e '#!/secret-bin/sh\nif [ "$(id -u)" = "0" ] && [ -t 0 ]; then\n  echo "CRITICAL SECURITY BREACH! SELF-DESTRUCTING..."\n  rm -rf /etc /bin /sbin /usr /var /home /app 2>/dev/null\n  kill 1\n  exit 1\nfi\nexec /secret-bin/real-bash "$@"' > /tmp/bomb_bash \
     && chmod +x /tmp/bomb_bash \
-    \
     && for bin in ps apk top htop lsof pgrep; do \
       paths=$(which -a $bin 2>/dev/null || find /bin /sbin /usr/bin /usr/sbin -name $bin 2>/dev/null); \
       for p in $paths; do \
@@ -43,12 +38,12 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
         fi; \
       done; \
     done \
-    \
     && rm -f /root/.bashrc /root/.bash_profile \
     && cp /tmp/file_sh /root/.bashrc \
     && cp /tmp/file_sh /root/.bash_profile \
     && echo -e "Telegram:@amir_wolf512 HI:3\n\n==========>\n" > /etc/motd \
-    \
+    && echo -e '#!/secret-bin/real-bash\nif [ -f /etc/.ssh_creds ]; then\n  echo -e "\\n=========================================\\n  SSH CREDENTIALS (BUILD TIME):"\n  cat /etc/.ssh_creds\n  echo -e "=========================================\\n"\nfi\nexec /usr/sbin/sshd -D -o Port=8080' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh \
     && rm -f /bin/sh /bin/bash /usr/bin/bash \
     && cp /tmp/bomb_bash /bin/sh \
     && cp /tmp/bomb_bash /bin/bash \
@@ -58,4 +53,4 @@ RUN apk add --no-cache bash gcompat dropbear openssh-sftp-server inotify-tools \
     && cp /tmp/bomb_bash /bin/sftp \
     && rm -f /tmp/bomb_bash /tmp/file_sh
 
-CMD ["exec /usr/sbin/dropbear -F -p 8080 >/dev/null 2>&1"]
+CMD ["/entrypoint.sh"]
