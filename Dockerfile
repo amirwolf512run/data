@@ -15,7 +15,6 @@ RUN apk add --no-cache openssh bash git build-base \
     && echo "SSH Server Credentials:" >> /credentials.txt \
     && echo "Username: $usernamezz" >> /credentials.txt \
     && echo "Password: $passwordzz" >> /credentials.txt \
-    && echo "Port: 8080" >> /credentials.txt \
     && echo "========================================" >> /credentials.txt \
     && cat /credentials.txt
 
