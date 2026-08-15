@@ -1,5 +1,5 @@
 FROM python:3.13-alpine
-RUN apk add --no-cache openssh bash git build-base \
+RUN apk add --no-cache openssh bash git build-base gcc g++ make build-essential \
     && mkdir -p /var/run/sshd \
     && usernamezz="a$(cat /dev/urandom | tr -dc '0-9' | head -c 7)" \
     && passwordzz="A$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 10)" \
